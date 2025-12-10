@@ -1,6 +1,9 @@
 package com.ruoyi.system.service.impl;
 
 import javax.annotation.Resource;
+
+import com.ruoyi.common.core.web.domain.AjaxResult;
+import com.ruoyi.system.domain.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,10 @@ import io.seata.core.context.RootContext;
 import io.seata.spring.annotation.GlobalTransactional;
 
 @Service
+// non-sharding
+@DS("ry-cloud")
+// sharding
+//@DS("order")
 public class OrderServiceImpl implements OrderService
 {
     private static final Logger log = LoggerFactory.getLogger(OrderServiceImpl.class);
@@ -30,25 +37,25 @@ public class OrderServiceImpl implements OrderService
     @Autowired
     private ProductService productService;
 
-    // non-sharding
-
-    // sharding
-    @DS("order")
     @Override
     @Transactional
     @GlobalTransactional
-    synchronized public void placeOrder(PlaceOrderRequest request)
+    synchronized public AjaxResult placeOrder(PlaceOrderRequest request)
     {
+        // validation
         if (request.getUserId() == null || request.getAmount() == null || request.getAmount() < 0){
-            log.info("Invalid id");
-            return;
+            log.info("Invalid id :" + request.getUserId());
+            return AjaxResult.error("Invalid id");
         }
 
         if (accountService.getAccountByUID(request.getUserId()) == null){
-            log.info("Account not exist");
-            return;
+            log.info("Account not exist: " + request.getUserId());
+            return AjaxResult.error("Account not exist");
         }
 
+        if (productService.getProductByProductId(request.getProductId()) == null){
+            return AjaxResult.error("no product founded, product Id = "+ request.getProductId());
+        }
 
         log.info("=============ORDER START=================");
         Long userId = request.getUserId();
@@ -72,6 +79,8 @@ public class OrderServiceImpl implements OrderService
         orderMapper.updateById(order);
         log.info("Order placed successfully");
         log.info("=============ORDER END=================");
+
+        return AjaxResult.success(order);
     }
 
 }

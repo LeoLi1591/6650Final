@@ -4,7 +4,7 @@ import com.ruoyi.system.domain.Product;
 
 public interface ProductMapper
 {
-    public Product selectById(Long productId);
+    Product selectById(Long productId);
 
-    public void updateById(Product product);
+    void updateById(Product product);
 }

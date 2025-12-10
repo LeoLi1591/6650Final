@@ -1,6 +1,8 @@
 package com.ruoyi.system.service.impl;
 
 import javax.annotation.Resource;
+
+import com.ruoyi.common.core.web.domain.AjaxResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,10 @@ import com.ruoyi.system.service.AccountService;
 import io.seata.core.context.RootContext;
 
 @Service
+// non-sharding
+@DS("ry-cloud")
+// sharding
+//@DS("account")
 public class AccountServiceImpl implements AccountService
 {
     private static final Logger log = LoggerFactory.getLogger(AccountServiceImpl.class);
@@ -20,8 +26,7 @@ public class AccountServiceImpl implements AccountService
     @Resource
     private AccountMapper accountMapper;
 
-    // sharding
-    @DS("account")
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     synchronized public Account getAccountByUID(Long userId) {
@@ -32,8 +37,6 @@ public class AccountServiceImpl implements AccountService
         return accountMapper.selectById(userId);
     }
 
-    // Request new to start new event
-    @DS("account")
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     synchronized public void reduceBalance(Long userId, Double price)

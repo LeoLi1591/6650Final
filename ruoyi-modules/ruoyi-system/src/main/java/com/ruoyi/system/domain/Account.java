@@ -42,4 +42,9 @@ public class Account
     {
         this.lastUpdateTime = lastUpdateTime;
     }
+
+    @Override
+    public String toString() {
+        return "Account [id=" + id + ", balance=" + balance + ", lastUpdateTime=" + lastUpdateTime;
+    }
 }

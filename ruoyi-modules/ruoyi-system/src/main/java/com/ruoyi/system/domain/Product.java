@@ -56,4 +56,9 @@ public class Product
     {
         this.lastUpdateTime = lastUpdateTime;
     }
+
+    @Override
+    public String toString() {
+        return "Product [id=" + id + ", price=" + price + ", stock=" + stock;
+    }
 }
