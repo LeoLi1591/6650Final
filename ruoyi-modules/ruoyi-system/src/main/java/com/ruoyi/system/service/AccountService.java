@@ -1,11 +1,13 @@
 package com.ruoyi.system.service;
 
+import com.ruoyi.system.domain.Account;
+
 public interface AccountService
 {
     /**
-     * 账户扣减
-     * @param userId 用户 ID
-     * @param price 扣减金额
+     reduce the balance
      */
     void reduceBalance(Long userId, Double price);
+
+    Account getAccountByUID(Long userId);
 }

@@ -30,33 +30,47 @@ public class OrderServiceImpl implements OrderService
     @Autowired
     private ProductService productService;
 
-    @DS("order") // 每一层都需要使用多数据源注解切换所选择的数据库
+    // non-sharding
+
+    // sharding
+    @DS("order")
     @Override
     @Transactional
-    @GlobalTransactional // 重点 第一个开启事务的需要添加seata全局事务注解
+    @GlobalTransactional
     synchronized public void placeOrder(PlaceOrderRequest request)
     {
+        if (request.getUserId() == null || request.getAmount() == null || request.getAmount() < 0){
+            log.info("Invalid id");
+            return;
+        }
+
+        if (accountService.getAccountByUID(request.getUserId()) == null){
+            log.info("Account not exist");
+            return;
+        }
+
+
         log.info("=============ORDER START=================");
         Long userId = request.getUserId();
         Long productId = request.getProductId();
         Integer amount = request.getAmount();
-        log.info("收到下单请求,用户:{}, 商品:{},数量:{}", userId, productId, amount);
+        log.info("GET order request,uid:{}, product_id:{},amount:{}", userId, productId, amount);
 
-        log.info("当前 XID: {}", RootContext.getXID());
+        log.info("Current XID: {}", RootContext.getXID());
 
         Order order = new Order(userId, productId, 0, amount);
 
         orderMapper.insert(order);
-        log.info("订单一阶段生成，等待扣库存付款中");
-        // 扣减库存并计算总价
+        log.info("Pending-------------");
+        // reduce the product stock
         Double totalPrice = productService.reduceStock(productId, amount);
-        // 扣减余额
+        // deduct the money from user
         accountService.reduceBalance(userId, totalPrice);
 
         order.setStatus(1);
         order.setTotalPrice(totalPrice);
         orderMapper.updateById(order);
-        log.info("订单已成功下单");
+        log.info("Order placed successfully");
         log.info("=============ORDER END=================");
     }
 

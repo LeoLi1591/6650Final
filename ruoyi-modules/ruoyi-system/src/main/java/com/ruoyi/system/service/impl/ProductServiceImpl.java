@@ -20,34 +20,37 @@ public class ProductServiceImpl implements ProductService
     @Resource
     private ProductMapper productMapper;
 
-    /**
-     * 事务传播特性设置为 REQUIRES_NEW 开启新的事务 重要！！！！一定要使用REQUIRES_NEW
-     */
+    // sharding
     @DS("product")
+    // master
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     synchronized public Double reduceStock(Long productId, Integer amount)
     {
         log.info("=============PRODUCT START=================");
-        log.info("当前 XID: {}", RootContext.getXID());
+        log.info("Current XID: {}", RootContext.getXID());
 
         // 检查库存
         Product product = productMapper.selectById(productId);
+        if (product == null){
+            log.info("The product is not exist");
+            return 0.0;
+        }
         Integer stock = product.getStock();
-        log.info("商品编号为 {} 的库存为{},订单商品数量为{}", productId, stock, amount);
+        log.info("Product id {} current stock = {}, purchase amount = {}", productId, stock, amount);
 
         if (stock < amount)
         {
-            log.warn("商品编号为{} 库存不足，当前库存:{}", productId, stock);
-            throw new RuntimeException("库存不足");
+            log.warn("product id {} insufficient stocks:{}", productId, stock);
+            throw new RuntimeException("insufficient stocks");
         }
-        log.info("开始扣减商品编号为 {} 库存,单价商品价格为{}", productId, product.getPrice());
+        log.info("Product id {} price is{}", productId, product.getPrice());
         // 扣减库存
         int currentStock = stock - amount;
         product.setStock(currentStock);
         productMapper.updateById(product);
         double totalPrice = product.getPrice() * amount;
-        log.info("扣减商品编号为 {} 库存成功,扣减后库存为{}, {} 件商品总价为 {} ", productId, currentStock, amount, totalPrice);
+        log.info("Product ID {} current stock is {}, {} total price is {} ", productId, currentStock, amount, totalPrice);
         log.info("=============PRODUCT END=================");
         return totalPrice;
     }

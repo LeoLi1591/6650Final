@@ -20,31 +20,44 @@ public class AccountServiceImpl implements AccountService
     @Resource
     private AccountMapper accountMapper;
 
-    /**
-     * 事务传播特性设置为 REQUIRES_NEW 开启新的事务 重要！！！！一定要使用REQUIRES_NEW
-     */
+    // sharding
     @DS("account")
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void reduceBalance(Long userId, Double price)
+    synchronized public Account getAccountByUID(Long userId) {
+        if (userId == null) {
+            log.error("Invalid id");
+            return null;
+        }
+        return accountMapper.selectById(userId);
+    }
+
+    // Request new to start new event
+    @DS("account")
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    synchronized public void reduceBalance(Long userId, Double price)
     {
+        if(price < 0){
+            log.info("price cannot be negative");
+        }
         log.info("=============ACCOUNT START=================");
-        log.info("当前 XID: {}", RootContext.getXID());
+        log.info("Current XID: {}", RootContext.getXID());
 
         Account account = accountMapper.selectById(userId);
         Double balance = account.getBalance();
-        log.info("下单用户{}余额为 {},商品总价为{}", userId, balance, price);
+        log.info("UID: {}, Balance {}, Total Price{}", userId, balance, price);
 
         if (balance < price)
         {
-            log.warn("用户 {} 余额不足，当前余额:{}", userId, balance);
-            throw new RuntimeException("余额不足");
+            log.warn("UID {} does not have enough balance，current balance:{}", userId, balance);
+            throw new RuntimeException("insufficient balance");
         }
-        log.info("开始扣减用户 {} 余额", userId);
+        log.info("Deduct {} balance", userId);
         double currentBalance = account.getBalance() - price;
         account.setBalance(currentBalance);
         accountMapper.updateById(account);
-        log.info("扣减用户 {} 余额成功,扣减后用户账户余额为{}", userId, currentBalance);
+        log.info("UID {} current balance is {}", userId, currentBalance);
         log.info("=============ACCOUNT END=================");
     }
 
