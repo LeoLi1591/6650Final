@@ -19,11 +19,12 @@ import com.ruoyi.system.service.ProductService;
 import io.seata.core.context.RootContext;
 import io.seata.spring.annotation.GlobalTransactional;
 
+
 @Service
 // non-sharding
-@DS("ry-cloud")
+//@DS("ry-cloud")
 // sharding
-//@DS("order")
+@DS("order")
 public class OrderServiceImpl implements OrderService
 {
     private static final Logger log = LoggerFactory.getLogger(OrderServiceImpl.class);
@@ -37,10 +38,11 @@ public class OrderServiceImpl implements OrderService
     @Autowired
     private ProductService productService;
 
+
     @Override
     @Transactional
     @GlobalTransactional
-    synchronized public AjaxResult placeOrder(PlaceOrderRequest request)
+    public AjaxResult placeOrder(PlaceOrderRequest request)
     {
         // validation
         if (request.getUserId() == null || request.getAmount() == null || request.getAmount() < 0){

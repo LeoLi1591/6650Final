@@ -16,9 +16,9 @@ import io.seata.core.context.RootContext;
 
 @Service
 // non-sharding
-@DS("ry-cloud")
+//@DS("ry-cloud")
 // sharding
-//@DS("account")
+@DS("account")
 public class AccountServiceImpl implements AccountService
 {
     private static final Logger log = LoggerFactory.getLogger(AccountServiceImpl.class);
@@ -29,7 +29,7 @@ public class AccountServiceImpl implements AccountService
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    synchronized public Account getAccountByUID(Long userId) {
+    public Account getAccountByUID(Long userId) {
         if (userId == null) {
             log.error("Invalid id");
             return null;
@@ -39,7 +39,7 @@ public class AccountServiceImpl implements AccountService
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    synchronized public void reduceBalance(Long userId, Double price)
+    public void reduceBalance(Long userId, Double price)
     {
         if(price < 0){
             log.info("price cannot be negative");

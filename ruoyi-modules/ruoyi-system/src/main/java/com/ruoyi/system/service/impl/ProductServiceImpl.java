@@ -16,9 +16,9 @@ import io.seata.core.context.RootContext;
 
 @Service
 // non-sharding
-@DS("ry-cloud")
+//@DS("ry-cloud")
 // sharding
-//@DS("product")
+@DS("product")
 public class ProductServiceImpl implements ProductService
 {
     private static final Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
@@ -29,7 +29,7 @@ public class ProductServiceImpl implements ProductService
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    synchronized public Product getProductByProductId(Long productId){
+    public Product getProductByProductId(Long productId){
         if (productId == null){
             log.info("productId is null");
             return null;
@@ -40,7 +40,7 @@ public class ProductServiceImpl implements ProductService
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
-    synchronized public Double reduceStock(Long productId, Integer amount)
+    public Double reduceStock(Long productId, Integer amount)
     {
         log.info("=============PRODUCT START=================");
         log.info("Current XID: {}", RootContext.getXID());
