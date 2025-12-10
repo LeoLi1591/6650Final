@@ -4,6 +4,7 @@ import javax.annotation.Resource;
 
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import com.ruoyi.system.domain.Product;
+import com.ruoyi.system.ruoyiUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +22,7 @@ import io.seata.spring.annotation.GlobalTransactional;
 
 
 @Service
-// non-sharding
-//@DS("ry-cloud")
-// sharding
-@DS("order")
+@DS("ry-cloud")
 public class OrderServiceImpl implements OrderService
 {
     private static final Logger log = LoggerFactory.getLogger(OrderServiceImpl.class);
@@ -37,6 +35,9 @@ public class OrderServiceImpl implements OrderService
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private ruoyiUtil util;
 
 
     @Override
@@ -67,18 +68,20 @@ public class OrderServiceImpl implements OrderService
 
         log.info("Current XID: {}", RootContext.getXID());
 
-        Order order = new Order(userId, productId, 0, amount);
 
-        orderMapper.insert(order);
         log.info("Pending-------------");
         // reduce the product stock
         Double totalPrice = productService.reduceStock(productId, amount);
         // deduct the money from user
         accountService.reduceBalance(userId, totalPrice);
 
+        // update the order
+        Order order = new Order(userId, productId, 0, amount);
         order.setStatus(1);
         order.setTotalPrice(totalPrice);
-        orderMapper.updateById(order);
+        String tableName = util.ensureCurrentWeekTable("p_order");
+        orderMapper.insert(tableName,order);
+
         log.info("Order placed successfully");
         log.info("=============ORDER END=================");
 

@@ -15,10 +15,7 @@ import com.ruoyi.system.service.AccountService;
 import io.seata.core.context.RootContext;
 
 @Service
-// non-sharding
-//@DS("ry-cloud")
-// sharding
-@DS("account")
+@DS("ry-cloud")
 public class AccountServiceImpl implements AccountService
 {
     private static final Logger log = LoggerFactory.getLogger(AccountServiceImpl.class);
