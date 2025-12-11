@@ -2,6 +2,7 @@ package com.ruoyi.system.service.impl;
 
 import javax.annotation.Resource;
 
+import com.ruoyi.common.core.utils.StringUtils;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import com.ruoyi.system.domain.Product;
 import com.ruoyi.system.ruoyiUtil;
@@ -19,6 +20,9 @@ import com.ruoyi.system.service.OrderService;
 import com.ruoyi.system.service.ProductService;
 import io.seata.core.context.RootContext;
 import io.seata.spring.annotation.GlobalTransactional;
+
+import java.time.LocalDate;
+import java.util.List;
 
 
 @Service
@@ -38,6 +42,34 @@ public class OrderServiceImpl implements OrderService
 
     @Autowired
     private ruoyiUtil util;
+
+    private Integer LIMIT = 100;
+    private Integer OFFSET = 0;
+
+    @Override
+    public List<Order> selectOrderList(PlaceOrderRequest request)
+    {
+        if(StringUtils.isEmpty(request.getQueryStartTime())) {
+            log.info("The query start time is empty");
+            return null;
+        }
+        // query the single sharded table base on the query start time
+
+        // we can make the request offsetting control by the front end
+        String tableName = util.getWeeklyTableName("p_order", util.parseDate(request.getQueryStartTime()));
+        if (!util.checkWeeklyTableExists(tableName)){
+            log.info("The table does not exist");
+            return null;
+        }
+
+        Order order = new Order(request.getUserId(),request.getProductId(), request.getStatus(),request.getQueryEndTime(), request.getAmount());
+        List<Order> test_data_show = orderMapper.selectOrderList(tableName,order, LIMIT, OFFSET);
+        return test_data_show;
+
+
+        // Todo: query across multiple tables
+    }
+
 
 
     @Override
@@ -76,8 +108,7 @@ public class OrderServiceImpl implements OrderService
         accountService.reduceBalance(userId, totalPrice);
 
         // update the order
-        Order order = new Order(userId, productId, 0, amount);
-        order.setStatus(1);
+        Order order = new Order(userId, productId, "COMPLETE", LocalDate.now().toString(),amount);
         order.setTotalPrice(totalPrice);
         String tableName = util.ensureCurrentWeekTable("p_order");
         orderMapper.insert(tableName,order);

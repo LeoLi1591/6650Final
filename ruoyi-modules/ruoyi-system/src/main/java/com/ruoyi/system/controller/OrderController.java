@@ -3,10 +3,7 @@ package com.ruoyi.system.controller;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.ruoyi.system.domain.dto.PlaceOrderRequest;
 import com.ruoyi.system.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,6 +20,11 @@ public class OrderController
     public AjaxResult placeOrder(@Validated @RequestBody PlaceOrderRequest request)
     {
         return orderService.placeOrder(request);
+    }
+
+    @GetMapping("/getOrderInfo")
+    public AjaxResult getOrderInfo(@Validated @RequestBody PlaceOrderRequest request){
+        return orderService.selectOrderList(request) == null ? AjaxResult.error() : AjaxResult.success();
     }
 
 //    @PostMapping("/test1")

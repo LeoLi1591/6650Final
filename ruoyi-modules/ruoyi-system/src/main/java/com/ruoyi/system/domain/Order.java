@@ -17,7 +17,7 @@ public class Order
     /**
      * 订单状态
      */
-    private int status;
+    private String status;
 
     /**
      * 数量
@@ -29,16 +29,33 @@ public class Order
      */
     private Double totalPrice;
 
+    private String addTime;
+
+    private String lastUpdateTime;
+
+
+
+
+
     public Order()
     {
     }
 
-    public Order(Long userId, Long productId, int status, Integer amount)
+    public Order(Long userId, Long productId, String status,String createTime ,Integer amount)
     {
         this.userId = userId;
         this.productId = productId;
         this.status = status;
         this.amount = amount;
+        this.addTime = createTime;
+    }
+
+    public void setLastUpdateTime(String lastUpdateTime){
+        this.lastUpdateTime = lastUpdateTime;
+    }
+
+    public void addTime(String createTime) {
+        this.addTime = createTime;
     }
 
     public Integer getId()
@@ -71,12 +88,12 @@ public class Order
         this.productId = productId;
     }
 
-    public int getStatus()
+    public String getStatus()
     {
         return status;
     }
 
-    public void setStatus(int status)
+    public void setStatus(String status)
     {
         this.status = status;
     }

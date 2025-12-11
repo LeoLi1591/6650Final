@@ -5,10 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
 
 
@@ -22,7 +21,30 @@ public class ruoyiUtil {
         this.dataSource = dataSource;
     }
 
+    /**
+     * check if table exist
+     * @return true false
+     */
+    public boolean checkWeeklyTableExists(String tableName) {
+        String sql = "SHOW TABLES LIKE ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
+            ps.setString(1, tableName);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public LocalDate parseDate(String dateStr) {
+        return LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    }
     /**
      * Calculate the table name by current time
      */

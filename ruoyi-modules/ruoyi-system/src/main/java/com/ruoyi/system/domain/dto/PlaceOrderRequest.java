@@ -8,6 +8,14 @@ public class PlaceOrderRequest
 
     private Integer amount;
 
+    private String queryStartTime;
+    private String queryEndTime;
+    private String status;
+
+    // pagination
+    // ruoyi has it's on the front end.
+    private int offsetting;  // We can make this front end control for instance 0~19, 20 ~ 39
+
     public PlaceOrderRequest()
     {
     }
@@ -17,6 +25,20 @@ public class PlaceOrderRequest
         this.userId = userId;
         this.productId = productId;
         this.amount = amount;
+    }
+    public int getOffsetting() {
+        return offsetting;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+    public String getQueryStartTime() {
+        return queryStartTime;
+    }
+
+    public String getQueryEndTime() {
+        return queryEndTime;
     }
 
     public Long getUserId()

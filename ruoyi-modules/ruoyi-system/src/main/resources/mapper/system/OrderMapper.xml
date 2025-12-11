@@ -57,4 +57,52 @@
         where id = #{order.id}
     </update>
 
+    <select id="selectOrderList"
+            parameterType="map"
+            resultMap="OrderResult">
+
+        SELECT
+        id,
+        user_id,
+        product_id,
+        amount,
+        total_price,
+        status,
+        add_time,
+        last_update_time
+        FROM ${orderTableName}
+        <where>
+            <if test="order.id != null">
+                AND id = #{order.id}
+            </if>
+            <if test="order.userId != null">
+                AND user_id = #{order.userId}
+            </if>
+            <if test="order.productId != null">
+                AND product_id = #{order.productId}
+            </if>
+            <if test="order.amount != null">
+                AND amount = #{order.amount}
+            </if>
+            <if test="order.totalPrice != null">
+                AND total_price = #{order.totalPrice}
+            </if>
+            <if test="order.status != null and order.status != ''">
+                AND status = #{order.status}
+            </if>
+            <!-- query time condtion
+            <if test="order.queryStartTime != null and order.queryStartTime != ''">
+                AND add_time &gt;= #{order.queryStartTime}
+            </if>
+            <if test="order.queryEndTime != null and order.queryEndTime != ''">
+                AND add_time &lt;= #{order.queryEndTime}
+            </if>
+            -->
+        </where>
+        ORDER BY id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+
+
 </mapper>
